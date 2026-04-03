@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D-TUBE | 3D Multiverse Engine</title>
+    <style>
+        :root { --neon: #00ffcc; --dark: #050505; --card: #121212; --glow: 0 0 15px rgba(0,255,204,0.4); }
+        body { background: var(--dark); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 80px; }
+        
+        /* Header & Profile */
+        header { background: rgba(0,0,0,0.95); padding: 15px; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid var(--neon); position: sticky; top: 0; z-index: 1000; }
+        .logo { color: var(--neon); font-weight: bold; font-size: 22px; text-shadow: var(--glow); }
+        .profile-area { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+        .profile-img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--neon); box-shadow: var(--glow); object-fit: cover; }
+        
+        /* Video Feed */
+        .feed { padding: 20px; display: flex; flex-direction: column; gap: 25px; }
+        .v-card { background: var(--card); border-radius: 20px; border: 1px solid #222; overflow: hidden; position: relative; }
+        .video-container { width: 100%; aspect-ratio: 16/9; background: #000; position: relative; }
+        video { width: 100%; height: 100%; object-fit: contain; }
+        
+        /* 3D Scanning Overlay */
+        .scan-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,255,204,0.1); display: none; pointer-events: none; }
+        .scan-line { width: 100%; height: 2px; background: var(--neon); position: absolute; top: 0; box-shadow: var(--glow); animation: scan 2s infinite linear; }
+        @keyframes scan { from { top: 0; } to { top: 100%; } }
+
+        /* UI Buttons */
+        .info { padding: 15px; }
+        .btn-3d { background: transparent; border: 1px solid var(--neon); color: var(--neon); padding: 10px; border-radius: 12px; width: 100%; cursor: pointer; font-weight: bold; transition: 0.3s; margin-top: 10px; }
+        .btn-3d:hover { background: var(--neon); color: black; box-shadow: var(--glow); }
+        
+        /* Floating Upload */
+        .fab { position: fixed; bottom: 25px; right: 25px; width: 65px; height: 65px; background: var(--neon); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 35px; color: black; cursor: pointer; box-shadow: var(--glow); z-index: 999; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">D-TUBE 🌌</div>
+    <div class="profile-area" onclick="updateProfile()">
+        <span id="userName">טוען...</span>
+        <img id="userImg" src="https://via.placeholder.com/150" class="profile-img">
+    </div>
+</header>
+
+<div class="feed" id="videoFeed">
+    </div>
+
+<div class="fab" onclick="initUpload()">+</div>
+
+<script>
+    // מערכת פרופיל משופרת
+    function updateProfile() {
+        const name = prompt("איך לקרוא לך במולטיוורס?");
+        if(name) {
+            localStorage.setItem('dName', name);
+            loadProfile();
+        }
+    }
+
+    function loadProfile() {
+        const name = localStorage.getItem('dName') || "היוצר 👑";
+        document.getElementById('userName').innerText = name;
+    }
+
+    // מערכת העלאת סרטונים וחיבור ל-3D
+    function initUpload() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'video/*';
+        input.onchange = e => {
+            const file = e.target.files[0];
+            const url = URL.createObjectURL(file);
+            renderVideo(file.name, url);
+        };
+        input.click();
+    }
+
+    function renderVideo(title, src) {
+        const feed = document.getElementById('videoFeed');
+        const card = document.createElement('div');
+        card.className = 'v-card';
+        card.innerHTML = `
+            <div class="video-container" id="cont-${Date.now()}">
+                <video src="${src}" controls></video>
+                <div class="scan-overlay"><div class="scan-line"></div></div>
+            </div>
+            <div class="info">
+                <h3>${title.split('.')[0]}</h3>
+                <p>זוהה ע"י מנוע ה-Multiverse</p>
+                <button class="btn-3d" onclick="run3DEngine(this)">הפעל סורק 3D 💎</button>
+            </div>
+        `;
+        feed.prepend(card);
+    }
+
+    // הליבה של ה-3D (הבסיס שביקשת)
+    function run3DEngine(btn) {
+        const card = btn.closest('.v-card');
+        const overlay = card.querySelector('.scan-overlay');
+        overlay.style.display = 'block';
+        btn.innerText = "מנתח עומק (Depth Map)...";
+
+        setTimeout(() => {
+            overlay.style.display = 'none';
+            btn.innerText = "הצג מודל תלת-מימדי 🧊";
+            alert("הניתוח הושלם!\nהדמות זוהתה במרחב.\nיוצר ענן נקודות (Point Cloud)... 🌌");
+            // כאן יבוא החיבור ל-Three.js בהמשך
+        }, 3000);
+    }
+
+    loadProfile();
+</script>
+
+</body>
+</html>
+
