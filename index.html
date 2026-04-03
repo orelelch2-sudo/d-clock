@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiverse D-TUBE | Network</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        :root { --d-glow: #00ffcc; --bg-dark: #050505; --card-bg: #121212; }
+        body { margin: 0; background: var(--bg-dark); color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow-x: hidden; }
+        
+        /* שורת ניווט עליונה */
+        #header { height: 70px; background: #0f0f0f; display: flex; align-items: center; justify-content: space-between; padding: 0 30px; border-bottom: 1px solid #222; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 20px rgba(0,255,204,0.1); }
+        #logo { color: var(--d-glow); font-weight: bold; font-size: 26px; letter-spacing: 2px; text-shadow: 0 0 10px var(--d-glow); cursor: pointer; }
+        #search-bar { flex: 0 1 500px; background: #1a1a1a; border: 1px solid #333; border-radius: 20px; padding: 8px 20px; color: white; outline: none; }
+        #profile-zone { display: flex; align-items: center; gap: 15px; }
+        .user-icon { width: 40px; height: 40px; background: var(--d-glow); border-radius: 50%; cursor: pointer; border: 2px solid #333; }
+
+        #main-layout { display: grid; grid-template-columns: 2.5fr 1fr; gap: 20px; padding: 20px; }
+        
+        /* אזור הנגן הראשי */
+        #video-main { background: #000; border-radius: 15px; border: 1px solid #333; padding: 15px; position: relative; }
+        #video-placeholder { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 10px; overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center; }
+        #canvas-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; transition: 1.5s ease; }
+        #canvas-container.active { opacity: 1; pointer-events: all; }
+        
+        #convert-btn { margin-top: 15px; width: 100%; padding: 15px; background: linear-gradient(45deg, #000, #111); border: 2px solid var(--d-glow); color: var(--d-glow); border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.4s; text-transform: uppercase; }
+        #convert-btn:hover { background: var(--d-glow); color: #000; box-shadow: 0 0 40px var(--d-glow); }
+
+        /* מאגר הסרטונים (Side Feed) */
+        #feed-section { display: flex; flex-direction: column; gap: 20px; max-height: 85vh; overflow-y: auto; padding-left: 10px; }
+        .video-card { background: var(--card-bg); border-radius: 12px; overflow: hidden; transition: 0.3s; cursor: pointer; border: 1px solid #222; }
+        .video-card:hover { border-color: var(--d-glow); transform: translateY(-3px); }
+        .thumb { width: 100%; height: 120px; background: #1a1a1a; position: relative; }
+        .thumb::after { content: "LIVE"; position: absolute; top: 10px; right: 10px; background: red; font-size: 10px; padding: 2px 6px; border-radius: 4px; }
+        .card-info { padding: 12px; }
+        .card-title { font-size: 14px; font-weight: bold; margin-bottom: 5px; }
+        .card-user { font-size: 12px; color: #888; }
+
+        @media (max-width: 900px) { #main-layout { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<div id="header">
+    <div id="logo">D-TUBE 🌌</div>
+    <input type="text" id="search-bar" placeholder="חפש במולטיוורס...">
+    <div id="profile-zone">
+        <span style="font-size: 14px;">הפרופיל שלי</span>
+        <div class="user-icon"></div>
+    </div>
+</div>
+
+<div id="main-layout">
+    <div id="video-main">
+        <div id="video-placeholder">
+            <h2 id="status-text">בחר סרטון מהמאגר... 📥</h2>
+            <div id="canvas-container"></div>
+        </div>
+        <button id="convert-btn" onclick="convertTo3D()">המרה למידול תלת-ממדי (D-MODEL) 🦾✨</button>
+        <div style="margin-top: 15px; padding: 10px; background: #111; border-radius: 8px;">
+            <h3 style="margin: 0; color: var(--d-glow);">תיאור הסרטון: סריקת מציאות מורחבת</h3>
+            <p style="font-size: 14px; color: #aaa;">העלאה על ידי: <b>User_09</b> | 1.2M צפיות</p>
+        </div>
+    </div>
+
+    <div id="feed-section">
+        <div class="video-card">
+            <div class="thumb" style="background: linear-gradient(to bottom, #111, #222);"></div>
+            <div class="card-info">
+                <div class="card-title">קרב גליץ' - עולם 7 ⚡</div>
+                <div class="card-user">הועלה ע"י: Master_G</div>
+            </div>
+        </div>
+        <div class="video-card">
+            <div class="thumb" style="background: linear-gradient(to bottom, #001f1a, #000);"></div>
+            <div class="card-info">
+                <div class="card-title">מידול דמות: Silvery 💎</div>
+                <div class="card-user">הועלה ע"י: Creator_01</div>
+            </div>
+        </div>
+        <div class="video-card">
+            <div class="thumb" style="background: linear-gradient(to bottom, #1a1a00, #000);"></div>
+            <div class="card-info">
+                <div class="card-title">סיור בטירה המלכותית 🏰</div>
+                <div class="card-user">הועלה ע"י: Royal_Admin</div>
+            </div>
+        </div>
+        </div>
+</div>
+
+<script>
+    let scene, camera, renderer, object;
+    const container = document.getElementById('canvas-container');
+
+    function init3D() {
+        scene = new THREE.Scene();
+        camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+        renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        container.appendChild(renderer.domElement);
+
+        // יצירת צורה יותר מעניינת מקוביה - גליל שמסמל דמות בסיסית
+        const geometry = new THREE.CylinderGeometry(0.5, 0.8, 2, 8);
+        const material = new THREE.MeshPhongMaterial({ color: 0x00ffcc, wireframe: true, emissive: 0x00ffcc });
+        object = new THREE.Mesh(geometry, material);
+        scene.add(object);
+
+        const light = new THREE.PointLight(0xffffff, 1.5, 100);
+        light.position.set(5, 5, 5);
+        scene.add(light);
+        scene.add(new THREE.AmbientLight(0x444444));
+        camera.position.z = 4;
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+        if(object) {
+            object.rotation.y += 0.01;
+            object.rotation.z += 0.005;
+        }
+        renderer.render(scene, camera);
+    }
+
+    function convertTo3D() {
+        document.getElementById('status-text').style.display = 'none';
+        container.classList.add('active');
+        document.getElementById('convert-btn').innerHTML = "סריקת מציאות הושלמה ✅";
+        if(!scene) { init3D(); animate(); }
+    }
+
+    window.addEventListener('resize', () => {
+        if(renderer) {
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+        }
+    });
+</script>
+</body>
+</html>
