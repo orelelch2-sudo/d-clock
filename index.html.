@@ -1,0 +1,74 @@
+// --- מנוע הסאונד (Web Audio API) ---
+const playSound = (type) => {
+    const sounds = {
+        'shock': '⚡_bzzz_static.mp3',
+        'lift': '🛸_gravity_hum.mp3',
+        'spatula': '🍳_smack_fast.mp3',
+        'shield': '🛡️_tank_thud.mp3',
+        'slide': '🛹_whoosh.mp3'
+    };
+    console.log(`Playing Sound: ${sounds[type]}`); 
+    // כאן יבוא הקוד שטוען את הקובץ האמיתי
+};
+
+// --- המחלקה הראשית של המשחק ---
+class GameEngine {
+    constructor(userRole) {
+        this.isOwner = (userRole === 'Silver'); // בדיקה אם זה אתה 👑
+        this.gravity = 0.8;
+    }
+
+    // ניהול תנועה חלקה (ריצה והחלקה)
+    handleMovement(player, action) {
+        if (action === 'sprint') {
+            player.speed = 2.5;
+            playSound('slide');
+        }
+        if (action === 'slide') {
+            player.isCrouching = true;
+            player.velocity.x *= 1.5; // תנופה להחלקה
+            setTimeout(() => player.isCrouching = false, 500);
+        }
+    }
+
+    // מערכת הנשקים המאוחדת
+    useWeapon(weaponType, target) {
+        if (!target) return;
+
+        switch (weaponType) {
+            case 'SilverSword': // חרב הלייזר של סילבר ⚔️
+                if (!this.isOwner) return;
+                
+                // יכולת 1: חישמול (5 שניות) + סאונד סטטי
+                target.canMove = false;
+                playSound('shock');
+                setTimeout(() => target.canMove = true, 5000);
+
+                // יכולת 2: הרמה (2 שניות) + סאונד חללית
+                target.y += 20; 
+                target.useGravity = false;
+                playSound('lift');
+                setTimeout(() => target.useGravity = true, 2000);
+                break;
+
+            case 'Spatula': // השפכטל המהיר 🍳
+                target.health -= 5;
+                playSound('spatula');
+                break;
+
+            case 'TankShield': // מגן הטנק 🛡️
+                this.activateShield(target);
+                break;
+        }
+    }
+
+    activateShield(player) {
+        player.canMove = false; // הופך לטנק נייח
+        playSound('shield');
+        // גל הדף (Knockback) לכל מי שקרוב
+        this.emitShockwave(player.position);
+    }
+}
+
+// --- הפעלה ---
+const myGame = new GameEngine('Silver'); 
